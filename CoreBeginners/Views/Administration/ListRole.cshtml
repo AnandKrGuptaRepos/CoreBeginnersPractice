@@ -1,10 +1,11 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿
 @model IEnumerable<IdentityRole>
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService authorizationServices
 
 @{
     ViewBag.Title = "All Roles";
 }
-
 <h2>All Roles</h2>
 @if (Model.Any())
 {
@@ -19,8 +20,25 @@
                 <h5 class="card-title">@role.Name</h5>
             </div>
             <div class="card-footer">
-                <a asp-action="EditRole" asp-controller="Administration" asp-route-Id="@role.Id" class ="btn btn-primary">Edit</a>
-                <a href="#" class="btn btn-danger">Delete</a>
+                <form method="post" asp-action="DeleteRole" asp-route-id="@role.Id">
+                    @if ((await authorizationServices.AuthorizeAsync(User, "EditRolePolicy")).Succeeded)
+                    {
+                        <a asp-action="EditRole" asp-controller="Administration" asp-route-Id="@role.Id" class="btn btn-primary">Edit</a>
+                    }
+                    @if ((await authorizationServices.AuthorizeAsync(User, "DeleteRolePolicy")).Succeeded)
+                    {
+                        <span id="ConfirmationDeleteUser_@role.Id" style="display:none">
+                            <span class="text-danger">Are you sure want to delete?</span>
+                            <button type="submit" class="btn btn-danger">Yes</button>
+                            <a href="#" class="btn btn-primary" onclick="ConfirmDelete('@role.Id',false)">No</a>
+                        </span>
+
+                        <span id="DeleteSpan_@role.Id">
+                            <a href="#" class="btn btn-danger" onclick="ConfirmDelete('@role.Id',true)">Delete</a>
+                        </span>
+                    }
+
+                </form>
             </div>
         </div>
     }
@@ -29,7 +47,7 @@ else
 {
     <div class="card">
         <div class="card-header">
-           No Roles Created yet
+            No Roles Created yet
         </div>
         <div class="card-body">
             <h5 class="card-title">Use the button below to create Role</h5>
@@ -41,3 +59,7 @@ else
 }
 
 
+
+@section Scripts{
+    <script src="~/js/CustomScript.js"></script>
+}

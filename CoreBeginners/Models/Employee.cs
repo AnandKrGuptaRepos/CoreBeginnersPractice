@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,5 +18,7 @@ namespace CoreBeginners.Models
         [Required]
         public Dept? Department { get; set; }
        public string PhotoPath { get; set; }
+        [NotMapped]
+        public string EncryptedId { get; set; }
     }
 }

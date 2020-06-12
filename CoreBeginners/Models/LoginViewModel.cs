@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Authentication;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -8,6 +9,10 @@ namespace CoreBeginners.Models
 {
     public class LoginViewModel
     {
+        public LoginViewModel()
+        {
+            ExternalLogins = null;
+        }
         [Required]
         [EmailAddress]
         public string Email { get; set; }
@@ -16,5 +21,7 @@ namespace CoreBeginners.Models
         public string Password { get; set; }
         [Display(Name ="Remember Me")]
         public bool RememberMe { get; set; }
+        public string ReturnUrl { get; set; }
+        public IList<AuthenticationScheme> ExternalLogins { get; set; }
     }
 }

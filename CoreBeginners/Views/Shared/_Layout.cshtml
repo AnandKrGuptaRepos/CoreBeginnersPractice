@@ -1,5 +1,4 @@
-﻿@using Microsoft.AspNetCore.Identity
-@inject SignInManager<ApplicationUser> sign
+﻿@inject SignInManager<ApplicationUser> sign
 <!DOCTYPE html>
 
 <html>
@@ -40,10 +39,14 @@
                     <li class="nav-item">
                         <a asp-controller="Home" asp-action="Create" class="nav-link">Create</a>
                     </li>
-                    @if (sign.IsSignedIn(User))
+                    @if (sign.IsSignedIn(User)&& User.IsInRole("Admin"))
                     {
-                        <li class="nav-item">
-                            <a asp-controller="Administration" asp-action="ListRole" class="nav-link">Manage Role</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="Navlink" data-toggle="dropdown" aria-haspopup="false">Manage</a> 
+                            <div class="dropdown-menu" aria-labelledby="Navlink">
+                                <a asp-controller="Administration" asp-action="ListUsers" class="dropdown-item">Users</a>
+                                <a asp-controller="Administration" asp-action="ListRole" class="dropdown-item">Role</a>
+                            </div>
                         </li>
                     }
 
@@ -51,11 +54,20 @@
                 <ul class="navbar-nav ml-auto">
                     @if (sign.IsSignedIn(User))
                     {
-                        <li class="nav-item">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="Navlink1" data-toggle="dropdown" aria-haspopup="false">@User.Identity.Name</a>
+                            <div class="dropdown-menu" aria-labelledby="Navlink1">
+                                <form asp-action="Logout" asp-controller="Account" method="post">
+                                    <button type="submit" class="dropdown-item">Logout</button>
+                                </form>
+                                <a asp-controller="Account" asp-action="ChangePassword" asp-route-Email="@User.Identity.Name" class="dropdown-item">Reset Password</a>
+                            </div>
+                        </li>
+                        @*<li class="nav-item">
                             <form asp-action="Logout" asp-controller="Account" method="post">
                                 <button type="submit" class="nav-link btn btn-link" style="width:auto;"> @User.Identity.Name</button>
                             </form>
-                        </li>
+                        </li>*@
                     }
                     else
                     {

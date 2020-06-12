@@ -18,6 +18,10 @@ namespace CoreBeginners.Models
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.MySeed();
+            foreach(var foreignkey in modelBuilder.Model.GetEntityTypes().SelectMany(c => c.GetForeignKeys()))
+            {
+                foreignkey.DeleteBehavior= DeleteBehavior.Restrict;
+            }
         }
     }
 }

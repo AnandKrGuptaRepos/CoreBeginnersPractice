@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CoreBeginners.Models;
 using CoreBeginners.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,19 +16,24 @@ namespace CoreBeginners.Controllers
     {
         private IEmployeeRepository _empployeeRepository;
         private IHostingEnvironment hostingEnvironment;
-        public HomeController(IEmployeeRepository employee, IHostingEnvironment hostingEnvironment)
+        private readonly IDataProtector protector;
+
+        public HomeController(IEmployeeRepository employee, IHostingEnvironment hostingEnvironment ,
+                              DataProtectionPurposeString datastring, IDataProtectionProvider data)
         {
             this.hostingEnvironment = hostingEnvironment;
             _empployeeRepository = employee;
+            protector = data.CreateProtector(datastring.EmployeeRouteValue);
         }
-        public ViewResult Details(int? id)
+        public ViewResult Details(string id)
         {
-           // throw new Exception("This is Demo Exception ");
-            Employee employee = _empployeeRepository.GetEmployee(id.Value);
+            // throw new Exception("This is Demo Exception ");
+            int empid = Convert.ToInt32(protector.Unprotect(id));
+            Employee employee = _empployeeRepository.GetEmployee(empid);
             if (employee == null)
             {
                 Response.StatusCode = 404;
-                return View("EmployeeNotFound",id.Value);
+                return View("EmployeeNotFound", empid);
             }
             HomeControllerViewModel homeControllerViewModel = new HomeControllerViewModel();
             homeControllerViewModel.Employee = employee;
@@ -37,7 +43,11 @@ namespace CoreBeginners.Controllers
         [AllowAnonymous]
         public ViewResult Index()
         {
-            return View(_empployeeRepository.GetAllEmployee());
+            return View(_empployeeRepository.GetAllEmployee()
+                            .Select(e => {
+                                e.EncryptedId = protector.Protect(e.Id.ToString());
+                               return e;
+                             }));
         }
         
         [HttpGet]
@@ -67,9 +77,10 @@ namespace CoreBeginners.Controllers
             return View();
         }
         [HttpGet]
-        public ViewResult Update(int id)
+        public ViewResult Update(string id)
         {
-            Employee employee = _empployeeRepository.GetEmployee(id);
+            int empid=Convert.ToInt32(protector.Unprotect(id));
+            Employee employee = _empployeeRepository.GetEmployee(empid);
             EmployeeCreateViewModel employeeCreateViewModel = new EmployeeCreateViewModel
             {
                 Id = employee.Id,

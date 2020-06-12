@@ -2,10 +2,60 @@
 @{
     ViewBag.Title = "User Login";
 }
+<style>
+    .custom-btn{
+    width: 70%;
+    margin: auto;
+    padding: 0 50px;
+    margin-top: 6px;
 
-<h1>User Login</h1>
+    }
+
+    .btns {
+        width: 100%;
+        padding: 12px;
+        border: solid 1px;
+        border-radius: 4px;
+        margin: 5px 0;
+        opacity: 0.85;
+        display: inline-block;
+        font-size: 17px;
+        line-height: 20px;
+        text-decoration: none; /* remove underline from anchors */
+    }
+
+    .facebook {
+        background-color:#3b5998;
+        color: white;
+    }
+
+    .twitter {
+        background-color: #5baaf4;
+        color: white;
+    }
+
+    .google {
+        background-color: #ffffff;
+        color: black;
+    }
+    .microsoft {
+        background-color:#d0021b;
+        color: white;
+    }
+
+    .btns:hover {
+        opacity: 1;
+    }
+
+    .fa-google-plus-square {
+        color: #db4437
+    }
+</style>
+<link href="~/lib/font/css/fontawesome.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-6">
+        <h1>Login</h1><hr />
         <form method="post">
             <div class="text-danger" asp-validation-summary="All"></div>
             <div class="form-group">
@@ -27,6 +77,47 @@
                 </div>
             </div>
             <button type="submit" class="btn btn-primary" style="width:auto;">Login</button>
+            <div> <a asp-action="ForgotPassword">Forgot Password </a></div>
         </form>
+    </div>
+    <div class="col-md-6">
+        <h1>External Login</h1><hr />
+        @{
+            if (Model.ExternalLogins.Count == 0)
+            {
+                <div>No External Logins Configured</div>
+            }
+            else
+            {
+                <form method="post" asp-action="ExternalLogin" asp-controller="Account" asp-route-returnUrl="@Model.ReturnUrl">
+                    <div class="custom-btn">
+                        @foreach (var provider in Model.ExternalLogins)
+                        {
+                            if (provider.DisplayName == "Google")
+                            {
+                            <button type="submit" class="@provider.DisplayName.ToLower() btns"
+                                    value="@provider.Name" name="provider"
+                                    title="login using your @provider.DisplayName account">
+                                    <i class="fa fa-google-plus-square"></i> Login with @provider.DisplayName+
+                            </button>
+                            }
+                            if (provider.DisplayName == "Facebook")
+                            {
+                                <button type="submit" class="@provider.DisplayName.ToLower() btns" value="@provider.Name" name="provider" title="login using your @provider.DisplayName account"><i class="fa fa-facebook-square"></i> Login with @provider.DisplayName</button>
+                            }
+
+                            if (provider.DisplayName == "Twitter")
+                            {
+                                <button type="submit" class="@provider.DisplayName.ToLower() btns" value="@provider.Name" name="provider" title="login using your @provider.DisplayName account"><i class="fa fa-twitter-square"></i> Login with @provider.DisplayName</button>
+                            }
+                            if (provider.DisplayName == "Microsoft")
+                            {
+                                <button type="submit" class="@provider.DisplayName.ToLower() btns" value="@provider.Name" name="provider" title="login using your @provider.DisplayName account"><i class="fa fa-windows"></i> Login with @provider.DisplayName</button>
+                            }
+                        }
+                    </div>
+                </form>
+            }
+        }
     </div>
 </div>
