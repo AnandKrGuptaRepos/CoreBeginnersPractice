@@ -33,8 +33,11 @@ namespace CoreBeginners
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            //This Line for adding service for DbContext class and provide Sql database Connection name for creating Migration. 
             services.AddDbContextPool<AppDbContext>(options=>
             options.UseSqlServer(_configuration.GetConnectionString("EmployeeConnection")));
+
+            //This Line for Adding services for Login/Register and Role Manage to IdentityDBContext  or set Custom Password Rules
             services.AddIdentity<ApplicationUser, IdentityRole>(option => {
                 option.Password.RequiredLength = 5;
                 option.Password.RequiredUniqueChars = 3;
@@ -44,8 +47,8 @@ namespace CoreBeginners
 
                 option.Lockout.MaxFailedAccessAttempts = 3;
                 option.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(2);
-            }).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders()
-            
+            }).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders() //If Add column to Migration and show error "Unable to create an object of type 'AppDBContext'" Then this line will be execute.
+
             //This Line for Custom Time duration for email Token provider life time
             .AddTokenProvider<CustomEmailConfirmationTokenProvider<ApplicationUser>>("CustomEmailConfirmation");
             //This line for all token set same life time (Reset password, Email confimation)
@@ -71,12 +74,14 @@ namespace CoreBeginners
                 //f.AppId = "262659601458765";
                 //f.AppSecret = "4cf8caee216b33830a3440a1a51cb418";
             });//.AddTwitter(t=> {
-            //    t.ConsumerKey = "988700148937-u7ararn5cf649v8b2op3rf8rj0bld454.apps.googleusercontent.com";
-            //    t.ConsumerSecret = "D15grZ7o9wKXawxoZEkDaFck";
-            //}).AddMicrosoftAccount(m=> {
-            //    m.ClientId = "988700148937-u7ararn5cf649v8b2op3rf8rj0bld454.apps.googleusercontent.com";
-            //    m.ClientSecret = "D15grZ7o9wKXawxoZEkDaFck";
-            //});
+               //    t.ConsumerKey = "988700148937-u7ararn5cf649v8b2op3rf8rj0bld454.apps.googleusercontent.com";
+               //    t.ConsumerSecret = "D15grZ7o9wKXawxoZEkDaFck";
+               //}).AddMicrosoftAccount(m=> {
+               //    m.ClientId = "988700148937-u7ararn5cf649v8b2op3rf8rj0bld454.apps.googleusercontent.com";
+               //    m.ClientSecret = "D15grZ7o9wKXawxoZEkDaFck";
+               //});
+
+            //This Line for Adding services to Globally Redirect AccessDenied Page if User Not Authorize to use that page.
             services.ConfigureApplicationCookie(c => c.AccessDeniedPath = new PathString("/Administration/AccessDenied"));
             services.AddMvc(option => 
             {
@@ -103,7 +108,10 @@ namespace CoreBeginners
             }
             app.UseStaticFiles();
             app.UseAuthentication();
-            
+            //app.Run(async (context) =>
+            //{
+            //    await context.Response.WriteAsync(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
+            //});
             app.UseMvc(routes =>
             {
                 routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
