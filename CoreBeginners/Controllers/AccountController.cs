@@ -5,6 +5,8 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using CoreBeginners.Models;
 using CoreBeginners.ViewModels;
+using DNTCaptcha.Core;
+using DNTCaptcha.Core.Providers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -19,13 +21,15 @@ namespace CoreBeginners.Controllers
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly ILogger<AccountController> logger;
+        private readonly IDNTCaptchaValidatorService dNTCaptcha;
 
         public AccountController(UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager, ILogger<AccountController> logger)
+            SignInManager<ApplicationUser> signInManager, ILogger<AccountController> logger, IDNTCaptchaValidatorService dNTCaptcha)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.logger = logger;
+            this.dNTCaptcha = dNTCaptcha;
         }
         [AcceptVerbs("Get","Post")]
         [AllowAnonymous]
@@ -119,7 +123,8 @@ namespace CoreBeginners.Controllers
         }
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Login(string returnUrl)
+      
+         public async Task<IActionResult> Login(string returnUrl)
         {
             LoginViewModel model = new LoginViewModel
             {
@@ -130,6 +135,9 @@ namespace CoreBeginners.Controllers
         }
         [HttpPost]
         [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        //[ValidateDNTCaptcha(
+        //    ErrorMessage ="Please Enter Valid Captch",CaptchaGeneratorLanguage =Language.English,CaptchaGeneratorDisplayMode =DisplayMode.SumOfTwoNumbers)]
         public async Task<IActionResult> Login(LoginViewModel model,string ReturnUrl)
         {
            model.ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
@@ -144,6 +152,11 @@ namespace CoreBeginners.Controllers
                 }
                 // End of Email Confirmation Code
                 var result =await signInManager.PasswordSignInAsync(model.Email,model.Password,model.RememberMe,true);
+                if (!dNTCaptcha.HasRequestValidCaptchaEntry(Language.English, DisplayMode.ShowDigits))
+                {
+                    this.ModelState.AddModelError(DNTCaptchaTagHelper.CaptchaInputName, "Please Enter Valid Captcha.");
+                    return View(model);
+                }
                 if (result.Succeeded)
                 {
                     if (!string.IsNullOrEmpty(ReturnUrl)&& Url.IsLocalUrl(ReturnUrl))

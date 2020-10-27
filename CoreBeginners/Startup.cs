@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using CoreBeginners.Security;
+using DNTCaptcha.Core;
 
 namespace CoreBeginners
 {
@@ -60,6 +61,9 @@ namespace CoreBeginners
                 option.AddPolicy("DeleteRolePolicy", policy => policy.RequireClaim("Delete Role"));
                 option.AddPolicy("EditRolePolicy", policy => policy.RequireClaim("Edit Role","true"));
             });
+
+            // This pipeline is basically used for using Captcha on Login
+            services.AddDNTCaptcha(options=>options.UseCookieStorageProvider().ShowThousandsSeparators(false));
 
             // This Line for Encription and decryption of route value
             services.AddSingleton<DataProtectionPurposeString>();
